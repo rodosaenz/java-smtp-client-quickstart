@@ -7,6 +7,4 @@ It has 4 main classes:
 - Send Attachment Email
 - Send Image Inline Email
 
-Prerequisites:
-mail-1.4.4.jar
-activation-1.1.1.jar
+For libraries required see maven pom.xml
