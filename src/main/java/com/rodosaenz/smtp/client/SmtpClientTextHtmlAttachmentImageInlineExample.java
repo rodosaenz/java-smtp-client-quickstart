@@ -1,9 +1,10 @@
-package com.rodosaenz.example.smtp.client;
+package com.rodosaenz.smtp.client;
 
 import java.util.Properties;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
+import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -19,7 +20,7 @@ import javax.mail.internet.MimeMultipart;
  *
  * @author Rodolfo
  */
-public class SmtpClientTextHtmlAttachmentExample {
+public class SmtpClientTextHtmlAttachmentImageInlineExample {
 
     public static void main(String[] args) {
 
@@ -56,48 +57,60 @@ public class SmtpClientTextHtmlAttachmentExample {
             message.setFrom(new InternetAddress(from));
 
             // Set To: header field of the header.
-            message.setRecipients(Message.RecipientType.TO,
+            message.addRecipients(Message.RecipientType.TO,
                     InternetAddress.parse(to));
 
             // Set Subject: header field
-            message.setSubject("Testing Java Text And Html And Attachment Email");
+            message.setSubject("Testing Java Text, Html, Attachment And Image Inline");
 
             /*
-            As this email has 3 parts, we have to create 3 parts
+            As this email has 4 parts, we have to create 4 parts
             using this:
                 MainMultipart              
                 |
-                ---- TextBodypart
+                ---- TextBodypart -- NO VA
                 |
                 ---- HtmlBodypart
                 |
                 ---- AttachmentBodypart
-            */
-                       
-            MimeMultipart mainMultipart = new MimeMultipart("alternative");
-           
+                |
+                ---- ImageInlineBodypart
+             */
+            MimeMultipart mainMultipart = new MimeMultipart("related");
+
             // first part (the text)
+            // So, now, if we use image inline, no need text any more
             BodyPart textBodypart = new MimeBodyPart();
-            String text = "Simple Text And Html Email";
+            String text = "Testing Java Text, Html, Attachment And Image Inline Email";
             textBodypart.setText(text);
-            mainMultipart.addBodyPart(textBodypart);
+            //mainMultipart.addBodyPart(textBodypart);
 
             // second part (the html)
             BodyPart htmlBodypart = new MimeBodyPart();
-            String html = "<h1>Testing Java Text And Html And Attachment Email</h1>";
+            String html = "<h1>Testing Java Text, Html, Attachment And Image Inline Email "
+                    + "<img src=\"cid:image_id_random\"></h1>";
             htmlBodypart.setContent(html, "text/html");
             mainMultipart.addBodyPart(htmlBodypart);
-            
 
             // third part (the attachment)
             BodyPart attachmentBodypart = new MimeBodyPart();
-            String filename = "aws-overview-2015-12.pdf";
-            DataSource source = new FileDataSource(filename);
-            attachmentBodypart.setDataHandler(new DataHandler(source));
-            attachmentBodypart.setFileName(source.getName());
+            String filepath = "aws-overview-2015-12.pdf";
+            DataSource fileSource = new FileDataSource(filepath);
+            attachmentBodypart.setDataHandler(new DataHandler(fileSource));
+            attachmentBodypart.setFileName(fileSource.getName());
+            //attachmentBodypart.setHeader("Content-Disposition", MimeBodyPart.ATTACHMENT);
             mainMultipart.addBodyPart(attachmentBodypart);
 
-            
+            // fourth part (the image inline)
+            BodyPart imageInlineBodypart = new MimeBodyPart();
+            DataSource imageSource = new FileDataSource("logo.png");
+            imageInlineBodypart.setFileName(imageSource.getName());
+            imageInlineBodypart.setDataHandler(new DataHandler(imageSource));
+            imageInlineBodypart.setHeader("Content-ID", "<image_id_random>");
+            imageInlineBodypart.setHeader("Content-Disposition", MimeBodyPart.INLINE);
+            imageInlineBodypart.setHeader("Content-Type", imageSource.getContentType());
+            mainMultipart.addBodyPart(imageInlineBodypart);
+
             message.setContent(mainMultipart);
 
             // Send message

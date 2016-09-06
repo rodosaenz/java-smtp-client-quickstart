@@ -1,4 +1,4 @@
-package com.rodosaenz.example.smtp.client;
+package com.rodosaenz.smtp.client;
 
 import java.util.Properties;
 import javax.mail.Message;

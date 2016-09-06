@@ -1,6 +1,9 @@
-package com.rodosaenz.example.smtp.client;
+package com.rodosaenz.smtp.client;
 
 import java.util.Properties;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -16,7 +19,7 @@ import javax.mail.internet.MimeMultipart;
  *
  * @author Rodolfo
  */
-public class SmtpClientTextHtmlExample {
+public class SmtpClientTextHtmlAttachmentExample {
 
     public static void main(String[] args) {
 
@@ -57,25 +60,45 @@ public class SmtpClientTextHtmlExample {
                     InternetAddress.parse(to));
 
             // Set Subject: header field
-            message.setSubject("Testing Java Text And Html Email");
-            
-            //As this email has 2 parts, we have to create 2 parts
-            //So we need a multipart to handle these           
-            MimeMultipart multipart = new MimeMultipart("alternative");
-            
+            message.setSubject("Testing Java Text And Html And Attachment Email");
+
+            /*
+            As this email has 3 parts, we have to create 3 parts
+            using this:
+                MainMultipart              
+                |
+                ---- TextBodypart
+                |
+                ---- HtmlBodypart
+                |
+                ---- AttachmentBodypart
+            */
+                       
+            MimeMultipart mainMultipart = new MimeMultipart("alternative");
+           
             // first part (the text)
-            BodyPart messageTextPart = new MimeBodyPart();
+            BodyPart textBodypart = new MimeBodyPart();
             String text = "Simple Text And Html Email";
-            messageTextPart.setText(text);
-            multipart.addBodyPart(messageTextPart);
-            
+            textBodypart.setText(text);
+            mainMultipart.addBodyPart(textBodypart);
+
             // second part (the html)
-            BodyPart messageHtmlPart = new MimeBodyPart();
-            String html = "<h1>Simple Text And Html Email</h1>";
-            messageHtmlPart.setContent(html,"text/html");
-            multipart.addBodyPart(messageHtmlPart);
+            BodyPart htmlBodypart = new MimeBodyPart();
+            String html = "<h1>Testing Java Text And Html And Attachment Email</h1>";
+            htmlBodypart.setContent(html, "text/html");
+            mainMultipart.addBodyPart(htmlBodypart);
             
-            message.setContent(multipart);
+
+            // third part (the attachment)
+            BodyPart attachmentBodypart = new MimeBodyPart();
+            String filename = "aws-overview-2015-12.pdf";
+            DataSource source = new FileDataSource(filename);
+            attachmentBodypart.setDataHandler(new DataHandler(source));
+            attachmentBodypart.setFileName(source.getName());
+            mainMultipart.addBodyPart(attachmentBodypart);
+
+            
+            message.setContent(mainMultipart);
 
             // Send message
             Transport.send(message);

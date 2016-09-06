@@ -1,9 +1,6 @@
-package com.rodosaenz.example.smtp.client;
+package com.rodosaenz.smtp.client;
 
 import java.util.Properties;
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -16,13 +13,11 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 /**
+ *
  * @author Rodolfo
  */
-public class SmtpClientImageInlineExample {
+public class SmtpClientTextHtmlExample {
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
 
         // Recipient's email ID needs to be mentioned.
@@ -62,35 +57,26 @@ public class SmtpClientImageInlineExample {
                     InternetAddress.parse(to));
 
             // Set Subject: header field
-            message.setSubject("Testing Java Inline Image Email");
-
-            // This mail has 2 part, the BODY and the embedded image
-            MimeMultipart multipart = new MimeMultipart("related");
-
-            // first part (the html)
-            BodyPart messageBodyPart = new MimeBodyPart();
-            String htmlText = "<H1>Hello</H1>"
-                    + "<div>This is a image inline <img src=\"cid:image_id_random\"></div>"
-                    + "<div>Bye</div>";
-            messageBodyPart.setContent(htmlText, "text/html");
-            // add it
-            multipart.addBodyPart(messageBodyPart);
-
-            // second part (the image)
-            messageBodyPart = new MimeBodyPart();
-            DataSource dataSource = new FileDataSource("src/quantic-logo.png");
-
-            messageBodyPart.setFileName(dataSource.getName());
-            messageBodyPart.setDataHandler(new DataHandler(dataSource));
-            messageBodyPart.setHeader("Content-ID", "<image_id_random>");
-            messageBodyPart.setHeader("Content-Disposition", "inline");
-            messageBodyPart.setHeader("Content-Type", dataSource.getContentType() );
-
-            // add image to the multipart
-            multipart.addBodyPart(messageBodyPart);
-
-            // put everything together
+            message.setSubject("Testing Java Text And Html Email");
+            
+            //As this email has 2 parts, we have to create 2 parts
+            //So we need a multipart to handle these           
+            MimeMultipart multipart = new MimeMultipart("alternative");
+            
+            // first part (the text)
+            BodyPart messageTextPart = new MimeBodyPart();
+            String text = "Simple Text And Html Email";
+            messageTextPart.setText(text);
+            multipart.addBodyPart(messageTextPart);
+            
+            // second part (the html)
+            BodyPart messageHtmlPart = new MimeBodyPart();
+            String html = "<h1>Simple Text And Html Email</h1>";
+            messageHtmlPart.setContent(html,"text/html");
+            multipart.addBodyPart(messageHtmlPart);
+            
             message.setContent(multipart);
+
             // Send message
             Transport.send(message);
 
